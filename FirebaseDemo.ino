@@ -1,7 +1,21 @@
 /*
-  Make sure your Firebase project's '.read' and '.write' rules are set to 'true'. 
-  Ignoring this will prevent the MCU from communicating with the database. 
-  For more details- https://github.com/Rupakpoddar/ESP8266Firebase 
+
+  Extract & Install CH341SER
+
+  Setup Board : 
+    1. File - Preferences
+    2. Additional Board Manager Urls :
+    3. Paste http://arduino.esp8266.com/stable/package_esp8266com_index.json
+    4. Tools - Board - Boards Manager
+    5. Install esp8266 by ESP8266 Community - Version 3.1.2
+    6. Tools - Upload Speed - 115200
+  
+
+  Install Library :
+  ArduinoJson by Benoit Blanchon - Version 5.13.5
+  ESP8266 Firebase by Rupak Poddar - Version 1.3.1
+  TinyGPSPlus by Mikal Hart - Version 1.0.3
+
 */
 
 #include <ESP8266Firebase.h>
@@ -9,13 +23,16 @@
 #include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
 
-#define _SSID "Hp gw"          // Your WiFi SSID
-#define _PASSWORD "01020304"      // Your WiFi Password
-#define REFERENCE_URL "https://monitoring-gps-kecepatan-default-rtdb.asia-southeast1.firebasedatabase.app/"  // Your Firebase project reference url
+#define _SSID "....."          // Your WiFi SSID
+#define _PASSWORD "....."      // Your WiFi Password
+#define REFERENCE_URL "....."  // Your Firebase project reference url
 
-static const int RXPin = D4, TXPin = D3;
-static const int Hall = D5;
+// Example Url : https://monitoring-gps-kecepatan-rtdb.asia-southeast1.firebasedatabase.app/
+
+static const int RXPin = D4, TXPin = D3; // Pin Neo 6M Gps
+static const int Hall = D5; // Pin Hall Effect Magnetic Sensor
 static const uint32_t GPSBaud = 9600;
+
 unsigned long waktuAwal;
 int count = 0, rps = 0;
 
@@ -54,33 +71,12 @@ void setup() {
   Serial.print(WiFi.localIP());
   Serial.println("/");
   digitalWrite(LED_BUILTIN, HIGH);
-
-//================================================================//
-//================================================================//
-
-  // Examples of setting String, integer and float values.
-//  firebase.setString("Example/setString", "It's Working");
-//  firebase.setInt("Example/setInt", 123);
-//  firebase.setFloat("Example/setFloat", 45.32);
-//
-//  // Examples of pushing String, integer and float values.
-//  firebase.pushString("push", "Hello");
-//  firebase.pushInt("push", 789);
-//  firebase.pushFloat("push", 89.54);
-//
-//  // Example of getting a String.
-//  String data1 = firebase.getString("Example/setString");
-//  Serial.print("Received String:\t");
-//  Serial.println(data1);
-//
-//  // Example of data deletion.
-//  firebase.deleteData("Example");
 }
 
 void displayInfo() {
+  millis();
   if(gps.location.isValid()) {
-    millis();
-
+  
     if(millis() - waktuAwal > 1000) {
       rps = count;
       count = 0;
@@ -93,7 +89,7 @@ void displayInfo() {
 
     if(digitalRead(Hall) == 0) {
       count++;
-      firebase.setInt("Monitoring/Count", count);
+      firebase.setInt("Monitoring/Count", count); // Bagian ini bisa di hapus
       while(digitalRead(Hall) == 0){}
     }
 
